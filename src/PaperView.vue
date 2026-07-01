@@ -1,621 +1,573 @@
 <template>
-    <div class="min-vh-100 bg-white">
-        <div class="bg-white" id="paper">
-            <div class="container py-5">
-                <!-- Header -->
-                <div class="text-center mb-5">
-                    <h2 class="demo-title">AccentCL: Robust Accent Classification with Incremental Expansion</h2>
-                    <p class="demo-subtitle">Anonymous Submission</p>
-                    <div class="header-links">
-                        <a href="#" class="header-link">Paper (placeholder)</a>
-                        <span class="header-link-sep">·</span>
-                        <a href="#" class="header-link">Code (placeholder)</a>
-                    </div>
-                </div>
-
-                <!-- Abstract -->
-                <div class="row justify-content-center mb-5">
-                    <div class="col-lg-10">
-                        <div class="abstract-block">
-                            <div class="abstract-title">Abstract</div>
-                            <p class="abstract-text">
-                                Accent classifiers are typically trained with fixed label inventories, yet practical
-                                systems must remain reliable under class imbalance, heterogeneous recording sources,
-                                and newly added accent categories. We present AccentCL, a framework for robust
-                                class-incremental English accent classification. AccentCL first builds a regional
-                                accent classifier using multi-layer representations from a frozen Whisper-Large-v3
-                                encoder. To improve generalization across heterogeneous training sources, we
-                                regularize the accent embedding space with class-conditional source mean alignment,
-                                encouraging samples with the same accent but from different datasets to remain
-                                consistent. AccentCL then expands the classifier to new accent classes through
-                                replay-based continual training, where a frozen base classifier preserves previously
-                                learned decisions and an old-to-new margin loss suppresses overprediction of newly
-                                added classes on replayed old samples. Experiments show that the base regional
-                                classifier achieves 77.1% balanced accuracy and 76.9% macro-F1 on the five-way
-                                regional task. After adding Spanish-accented English, AccentCL achieves 83.3%
-                                new-class F1 while retaining 77.3% old-class balanced accuracy, with an average
-                                old-class drop of 0.8 points. After further adding Chinese-accented English, AccentCL
-                                achieves 61.8% new-class F1 while preserving 77.6% balanced accuracy on previously
-                                learned classes. These results show that accent classifiers can be made more robust
-                                and extensible without retraining from scratch.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Architecture -->
-                <div class="row justify-content-center mb-5">
-                    <div class="col-lg-10">
-                        <div class="figure-block">
-                            <div class="figure-title">Method Overview</div>
-                            <div class="figure-container">
-                                <img :src="getAssetUrl('/figures/architecture-placeholder.svg')"
-                                    alt="AccentCL Architecture" class="figure-img" />
-                            </div>
-                            <p class="figure-caption">
-                                <b>Placeholder figure.</b> Replace with the AccentCL architecture diagram: the frozen
-                                Whisper-Large-v3 encoder, multi-layer feature aggregation, class-conditional source
-                                mean alignment, and the replay-based incremental expansion stage with the
-                                old-to-new margin loss.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Results -->
-                <div class="row justify-content-center mb-5">
-                    <div class="col-lg-10">
-                        <div class="figure-block">
-                            <div class="figure-title">Results</div>
-                            <div class="table-responsive">
-                                <table class="results-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Stage</th>
-                                            <th>Old-Class Balanced Accuracy</th>
-                                            <th>New-Class F1</th>
-                                            <th>Notes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Base regional classifier (5-way)</td>
-                                            <td>77.1%</td>
-                                            <td>&ndash;</td>
-                                            <td>Macro-F1: 76.9%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>+ Spanish-accented English</td>
-                                            <td>77.3% <span class="delta">(&minus;0.8 pts avg. drop)</span></td>
-                                            <td>83.3%</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>+ Chinese-accented English</td>
-                                            <td>77.6%</td>
-                                            <td>61.8%</td>
-                                            <td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="figure-container mt-4">
-                                <img :src="getAssetUrl('/figures/results-placeholder.svg')" alt="AccentCL Results"
-                                    class="figure-img" />
-                            </div>
-                            <p class="figure-caption">
-                                <b>Placeholder figure.</b> Replace with confusion matrices per stage or an
-                                accuracy-across-stages plot.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Interactive Demo -->
-                <div class="row justify-content-center mb-5">
-                    <div class="col-lg-10">
-                        <div class="models-header">
-                            <h3 class="models-title">Listen &amp; Classify</h3>
-                        </div>
-                        <p class="demo-note">
-                            Placeholder demo audio and predictions below &mdash; replace the files under
-                            <code>public/demo/&lt;stage&gt;/&lt;accent&gt;/</code> and the sample metadata in
-                            <code>src/PaperView.vue</code> with real utterances and model predictions.
-                        </p>
-
-                        <div class="selector-panel mb-4">
-                            <div class="selector-group">
-                                <label class="selector-label">Classifier stage:</label>
-                                <select v-model="selectedStageKey" class="pair-select">
-                                    <option v-for="stage in stages" :key="stage.key" :value="stage.key">
-                                        {{ stage.label }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="selector-panel mb-4">
-                            <div class="selector-group">
-                                <label class="selector-label">True accent:</label>
-                                <select v-model="selectedClass" class="pair-select">
-                                    <option v-for="cls in currentStage.classes" :key="cls" :value="cls">
-                                        {{ cls }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="selector-panel mb-4">
-                            <div class="selector-group">
-                                <label class="selector-label">Sample:</label>
-                                <select v-model="selectedSampleId" class="pair-select">
-                                    <option v-for="sample in currentSamples" :key="sample.id" :value="sample.id">
-                                        {{ sample.id }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="audio-section" v-if="currentSample">
-                            <div class="audio-section-title">{{ currentSample.id }}</div>
-                            <div class="src-tgt-row">
-                                <div class="audio-column src-column">
-                                    <div class="audio-label">Audio</div>
-                                    <audio :src="getAssetUrl(`/demo/${selectedStageKey}/${slugify(selectedClass)}/${currentSample.id}.wav`)"
-                                        controls></audio>
-                                </div>
-                                <div class="audio-column tgt-column">
-                                    <div class="audio-label">Ground Truth</div>
-                                    <div class="prediction-value">{{ selectedClass }}</div>
-                                </div>
-                            </div>
-                            <div class="results-separator"></div>
-                            <div class="results-row-container">
-                                <div class="results-label">Predicted (placeholder)</div>
-                                <div class="prediction-row">
-                                    <div class="prediction-main">{{ currentSample.predicted }}</div>
-                                    <div class="prediction-confidence">confidence: {{ currentSample.confidence }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Citation -->
-                <div class="row justify-content-center mb-5">
-                    <div class="col-lg-10">
-                        <div class="figure-block">
-                            <div class="figure-title">Citation</div>
-                            <pre class="citation-block">@inproceedings{accentcl,
-  title     = {AccentCL: Robust Accent Classification with Incremental Expansion},
-  author    = {Anonymous},
-  booktitle = {Anonymous Submission},
-  year      = {2026}
-}</pre>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+  <div class="min-vh-100 bg-white">
+    <div class="bg-white" id="paper">
+      <div class="container py-5">
+        <!-- Header -->
+        <div class="text-center mb-5">
+          <h2 class="demo-title">
+            AccentCL: Robust Accent Classification with Incremental Expansion
+          </h2>
+          <p class="demo-subtitle">Anonymous Submission</p>
+          <div class="header-links">
+            <a href="#" class="header-link">Paper (Coming Soon)</a>
+            <span class="header-link-sep">·</span>
+            <a href="#" class="header-link">Code (Coming Soon)</a>
+          </div>
         </div>
+
+        <!-- Abstract -->
+        <div class="row justify-content-center mb-5">
+          <div class="col-lg-10">
+            <div class="abstract-block">
+              <div class="abstract-title">Abstract</div>
+              <p class="abstract-text">
+                Accent classifiers are typically trained with fixed label inventories, yet practical
+                systems must remain reliable under class imbalance, heterogeneous recording sources,
+                and newly added accent categories. We present AccentCL, a framework for robust
+                class-incremental English accent classification. AccentCL first builds a regional
+                accent classifier using multi-layer representations from a frozen Whisper-Large-v3
+                encoder. To improve generalization across heterogeneous training sources, we
+                regularize the accent embedding space with class-conditional source mean alignment,
+                encouraging samples with the same accent but from different datasets to remain
+                consistent. AccentCL then expands the classifier to new accent classes through
+                replay-based continual training, where a frozen base classifier preserves previously
+                learned decisions and an old-to-new margin loss suppresses overprediction of newly
+                added classes on replayed old samples. Experiments show that the base regional
+                classifier achieves 77.1% balanced accuracy and 76.9% macro-F1 on the five-way
+                regional task. After adding Spanish-accented English, AccentCL achieves 83.3%
+                new-class F1 while retaining 77.3% old-class balanced accuracy, with an average
+                old-class drop of 0.8 points. After further adding Chinese-accented English,
+                AccentCL achieves 61.8% new-class F1 while preserving 77.6% balanced accuracy on
+                previously learned classes. These results show that accent classifiers can be made
+                more robust and extensible without retraining from scratch.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="row justify-content-center mb-5">
+          <div class="col-lg-10">
+            <div class="figure-block">
+              <div class="figure-title">Method Overview</div>
+              <div class="figure-container">
+                <img
+                  :src="getAssetUrl('/figures/thumbnail.svg')"
+                  alt="AccentCL Architecture"
+                  class="figure-img"
+                />
+              </div>
+              <p class="figure-caption">
+                <b>Model architecture of AccentCL.</b> A frozen Whisper-Large-v3 encoder provides
+                multi-layer speech representations, which are projected, concatenated, and pooled
+                with attentive statistics pooling to produce an accent embedding. Phase 1 trains a
+                base regional accent classifier with source mean alignment. Phase 2 expands the
+                classifier to a new accent class using replay-based continual training with
+                retention and an old-to-new margin loss
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="row justify-content-center mb-5">
+          <div class="col-lg-10">
+            <div class="figure-block">
+              <div class="figure-title">Results</div>
+              <div class="table-responsive">
+                <table class="results-table">
+                  <thead>
+                    <tr>
+                      <th>Stage</th>
+                      <th>Old-Class Balanced Accuracy</th>
+                      <th>New-Class F1</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Base regional classifier (5-way)</td>
+                      <td>77.1%</td>
+                      <td>&ndash;</td>
+                      <td>Macro-F1: 76.9%</td>
+                    </tr>
+                    <tr>
+                      <td>+ Spanish-accented English</td>
+                      <td>77.3% <span class="delta">(&minus;0.8 pts avg. drop)</span></td>
+                      <td>83.3%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>+ Chinese-accented English</td>
+                      <td>77.6%</td>
+                      <td>61.8%</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="row mt-4 g-3">
+                <div class="col-md-6">
+                  <div class="figure-container">
+                    <img
+                      :src="getAssetUrl('/figures/chinese_cm.svg')"
+                      alt="Confusion matrix after adding Chinese-accented English"
+                      class="figure-img"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="figure-container">
+                    <img
+                      :src="getAssetUrl('/figures/chinese_tsne_feat.svg')"
+                      alt="t-SNE of accent embeddings after adding Chinese-accented English"
+                      class="figure-img"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p class="figure-caption">
+                <b>Left:</b> Confusion matrix of the final 7-way classifier (5 regions + Spanish-
+                and Chinese-accented English), showing old-class predictions remain concentrated
+                on the diagonal after two rounds of class expansion.
+                <b>Right:</b> t-SNE projection of accent embeddings at the same stage, showing
+                the newly added Chinese-accented English cluster is well separated from the
+                five base regional clusters and from Spanish-accented English.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 
 const getAssetUrl = (path) => {
-    const base = import.meta.env.BASE_URL || '/'
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path
-    const cleanBase = base.endsWith('/') ? base : base + '/'
-    return cleanBase + cleanPath
+  const base = import.meta.env.BASE_URL || '/'
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path
+  const cleanBase = base.endsWith('/') ? base : base + '/'
+  return cleanBase + cleanPath
 }
 
-const slugify = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+const slugify = (label) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 
 const baseClasses = ['Region A', 'Region B', 'Region C', 'Region D', 'Region E']
 
 const stages = [
-    {
-        key: 'base',
-        label: 'Stage 1: Base (5-way regional)',
-        classes: baseClasses,
-    },
-    {
-        key: 'spanish',
-        label: 'Stage 2: + Spanish-accented English',
-        classes: [...baseClasses, 'Spanish-accented English'],
-    },
-    {
-        key: 'chinese',
-        label: 'Stage 3: + Chinese-accented English',
-        classes: [...baseClasses, 'Spanish-accented English', 'Chinese-accented English'],
-    },
+  {
+    key: 'base',
+    label: 'Stage 1: Base (5-way regional)',
+    classes: baseClasses,
+  },
+  {
+    key: 'spanish',
+    label: 'Stage 2: + Spanish-accented English',
+    classes: [...baseClasses, 'Spanish-accented English'],
+  },
+  {
+    key: 'chinese',
+    label: 'Stage 3: + Chinese-accented English',
+    classes: [...baseClasses, 'Spanish-accented English', 'Chinese-accented English'],
+  },
 ]
 
 // Placeholder samples/predictions per stage+class. Replace with real sample IDs and model outputs.
 const samplesByStageAndClass = {}
 for (const stage of stages) {
-    samplesByStageAndClass[stage.key] = {}
-    for (const cls of stage.classes) {
-        samplesByStageAndClass[stage.key][cls] = [
-            { id: 'sample_01', predicted: cls, confidence: '0.00 (placeholder)' },
-            { id: 'sample_02', predicted: cls, confidence: '0.00 (placeholder)' },
-        ]
-    }
+  samplesByStageAndClass[stage.key] = {}
+  for (const cls of stage.classes) {
+    samplesByStageAndClass[stage.key][cls] = [
+      { id: 'sample_01', predicted: cls, confidence: '0.00 (placeholder)' },
+      { id: 'sample_02', predicted: cls, confidence: '0.00 (placeholder)' },
+    ]
+  }
 }
 
 const selectedStageKey = ref(stages[0].key)
 const selectedClass = ref(stages[0].classes[0])
 const selectedSampleId = ref(samplesByStageAndClass[stages[0].key][stages[0].classes[0]][0].id)
 
-const currentStage = computed(() => stages.find((s) => s.key === selectedStageKey.value) ?? stages[0])
+const currentStage = computed(
+  () => stages.find((s) => s.key === selectedStageKey.value) ?? stages[0],
+)
 
 const currentSamples = computed(() => {
-    const classes = samplesByStageAndClass[selectedStageKey.value]
-    return classes?.[selectedClass.value] ?? []
+  const classes = samplesByStageAndClass[selectedStageKey.value]
+  return classes?.[selectedClass.value] ?? []
 })
 
-const currentSample = computed(() => currentSamples.value.find((s) => s.id === selectedSampleId.value) ?? currentSamples.value[0])
+const currentSample = computed(
+  () =>
+    currentSamples.value.find((s) => s.id === selectedSampleId.value) ?? currentSamples.value[0],
+)
 </script>
 
 <style scoped>
 /* Abstract */
 .abstract-block {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-left: 4px solid #0969da;
-    border-radius: 12px;
-    padding: 28px 32px;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-left: 4px solid #0969da;
+  border-radius: 12px;
+  padding: 28px 32px;
 }
 
 .abstract-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #0969da;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0969da;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 14px;
 }
 
 .abstract-text {
-    font-size: 15px;
-    color: #24292f;
-    line-height: 1.75;
-    margin: 0;
-    letter-spacing: -0.1px;
+  font-size: 15px;
+  color: #24292f;
+  line-height: 1.75;
+  margin: 0;
+  letter-spacing: -0.1px;
 }
 
 /* Figure blocks */
 .figure-block {
-    background: #ffffff;
-    border: 1px solid #e1e4e8;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .figure-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #24292f;
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #f6f8fa;
+  font-size: 18px;
+  font-weight: 600;
+  color: #24292f;
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f6f8fa;
 }
 
 .figure-container {
-    width: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #f6f8fa;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f6f8fa;
 }
 
 .figure-img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 8px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
 }
 
 .figure-caption {
-    font-size: 13.5px;
-    color: #57606a;
-    line-height: 1.7;
-    margin: 16px 0 0 0;
-    padding-top: 14px;
-    border-top: 1px solid #e1e4e8;
+  font-size: 13.5px;
+  color: #57606a;
+  line-height: 1.7;
+  margin: 16px 0 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #e1e4e8;
 }
 
 /* Header */
 .demo-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #24292f;
-    letter-spacing: -1px;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #24292f 0%, #0969da 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  font-size: 32px;
+  font-weight: 700;
+  color: #24292f;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #24292f 0%, #0969da 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .demo-subtitle {
-    font-size: 16px;
-    font-weight: 400;
-    color: #57606a;
-    letter-spacing: -0.2px;
-    line-height: 1.4;
-    margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #57606a;
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+  margin: 0 0 12px 0;
 }
 
 .header-links {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .header-link {
-    color: #0969da;
-    text-decoration: none;
-    font-weight: 500;
+  color: #0969da;
+  text-decoration: none;
+  font-weight: 500;
 }
 
 .header-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .header-link-sep {
-    color: #d0d7de;
-    margin: 0 10px;
+  color: #d0d7de;
+  margin: 0 10px;
 }
 
 /* Results table */
 .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14.5px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
 }
 
 .results-table th,
 .results-table td {
-    padding: 12px 14px;
-    text-align: left;
-    border-bottom: 1px solid #e1e4e8;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e1e4e8;
 }
 
 .results-table th {
-    color: #57606a;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    background: #f6f8fa;
+  color: #57606a;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: #f6f8fa;
 }
 
 .results-table td {
-    color: #24292f;
+  color: #24292f;
 }
 
 .delta {
-    color: #57606a;
-    font-size: 12.5px;
+  color: #57606a;
+  font-size: 12.5px;
 }
 
 /* Demo section */
 .demo-note {
-    font-size: 13.5px;
-    color: #57606a;
-    margin-bottom: 20px;
+  font-size: 13.5px;
+  color: #57606a;
+  margin-bottom: 20px;
 }
 
 .demo-note code {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-radius: 4px;
-    padding: 1px 5px;
-    font-size: 12.5px;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12.5px;
 }
 
 .models-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .models-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #24292f;
-    margin: 0;
-    letter-spacing: -0.3px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #24292f;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
 /* Selector panel */
 .selector-panel {
-    background: #ffffff;
-    border: 1px solid #e1e4e8;
-    border-radius: 12px;
-    padding: 20px 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .selector-group {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .selector-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #24292f;
-    letter-spacing: -0.2px;
-    white-space: nowrap;
-    min-width: 120px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #24292f;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  min-width: 120px;
 }
 
 .pair-select {
-    flex: 1;
-    max-width: 400px;
-    padding: 12px 14px;
-    font-size: 15px;
-    border: 1.5px solid #d0d7de;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #24292f;
-    font-weight: 500;
-    letter-spacing: -0.2px;
-    transition: all 0.2s ease;
+  flex: 1;
+  max-width: 400px;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1.5px solid #d0d7de;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #24292f;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  transition: all 0.2s ease;
 }
 
 .pair-select:focus {
-    outline: none;
-    border-color: #0969da;
-    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
 }
 
 /* Audio section */
 .audio-section {
-    background: #ffffff;
-    border: 1px solid #e1e4e8;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .audio-section-title {
-    font-size: 19px;
-    font-weight: 600;
-    color: #24292f;
-    margin-bottom: 20px;
-    letter-spacing: -0.4px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #f6f8fa;
+  font-size: 19px;
+  font-weight: 600;
+  color: #24292f;
+  margin-bottom: 20px;
+  letter-spacing: -0.4px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f6f8fa;
 }
 
 .src-tgt-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 .audio-column {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: #f6f8fa;
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid #e1e4e8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f6f8fa;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e1e4e8;
 }
 
 .src-column {
-    border-left: 3px solid #0969da;
+  border-left: 3px solid #0969da;
 }
 
 .tgt-column {
-    border-left: 3px solid #1a7f37;
+  border-left: 3px solid #1a7f37;
 }
 
 .audio-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #57606a;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  color: #57606a;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .audio-column audio {
-    width: 100%;
-    height: 40px;
-    outline: none;
+  width: 100%;
+  height: 40px;
+  outline: none;
 }
 
 .prediction-value {
-    font-size: 15px;
-    font-weight: 600;
-    color: #24292f;
+  font-size: 15px;
+  font-weight: 600;
+  color: #24292f;
 }
 
 .results-separator {
-    height: 1px;
-    background: linear-gradient(to right, transparent, #d0d7de 20%, #d0d7de 80%, transparent);
-    margin: 24px 0;
-    position: relative;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d0d7de 20%, #d0d7de 80%, transparent);
+  margin: 24px 0;
+  position: relative;
 }
 
 .results-separator::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 8px;
-    height: 8px;
-    background: #0969da;
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px #d0d7de;
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #0969da;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 4px #d0d7de;
 }
 
 .results-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #57606a;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
 }
 
 .prediction-row {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .prediction-main {
-    font-size: 18px;
-    font-weight: 700;
-    color: #0969da;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0969da;
 }
 
 .prediction-confidence {
-    font-size: 13px;
-    color: #57606a;
+  font-size: 13px;
+  color: #57606a;
 }
 
 /* Citation */
 .citation-block {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-radius: 8px;
-    padding: 16px 20px;
-    font-size: 13px;
-    color: #24292f;
-    overflow-x: auto;
-    margin: 0;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 13px;
+  color: #24292f;
+  overflow-x: auto;
+  margin: 0;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .demo-title {
-        font-size: 24px;
-        letter-spacing: -0.5px;
-    }
+  .demo-title {
+    font-size: 24px;
+    letter-spacing: -0.5px;
+  }
 
-    .selector-group {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+  .selector-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    .pair-select {
-        max-width: 100%;
-        width: 100%;
-    }
+  .pair-select {
+    max-width: 100%;
+    width: 100%;
+  }
 
-    .src-tgt-row {
-        grid-template-columns: 1fr;
-    }
+  .src-tgt-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
