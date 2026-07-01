@@ -21,25 +21,27 @@
             <div class="abstract-block">
               <div class="abstract-title">Abstract</div>
               <p class="abstract-text">
-                Accent classifiers are typically trained with fixed label inventories, yet practical
-                systems must remain reliable under class imbalance, heterogeneous recording sources,
-                and newly added accent categories. We present AccentCL, a framework for robust
-                class-incremental English accent classification. AccentCL first builds a regional
-                accent classifier using multi-layer representations from a frozen Whisper-Large-v3
-                encoder. To improve generalization across heterogeneous training sources, we
-                regularize the accent embedding space with class-conditional source mean alignment,
-                encouraging samples with the same accent but from different datasets to remain
-                consistent. AccentCL then expands the classifier to new accent classes through
-                replay-based continual training, where a frozen base classifier preserves previously
-                learned decisions and an old-to-new margin loss suppresses overprediction of newly
-                added classes on replayed old samples. Experiments show that the base regional
-                classifier achieves 77.1% balanced accuracy and 76.9% macro-F1 on the five-way
-                regional task. After adding Spanish-accented English, AccentCL achieves 83.3%
-                new-class F1 while retaining 77.3% old-class balanced accuracy, with an average
-                old-class drop of 0.8 points. After further adding Chinese-accented English,
-                AccentCL achieves 61.8% new-class F1 while preserving 77.6% balanced accuracy on
-                previously learned classes. These results show that accent classifiers can be made
-                more robust and extensible without retraining from scratch.
+                Accent classifiers are typically trained with a fixed label inventory and cannot
+                accommodate new accent categories as new data becomes available. Moreover, accented
+                speech corpora often exhibit substantial class imbalance and/or domain shift due to
+                differences in recording conditions across corpora. We present AccentCL, a
+                class-incremental learning framework for English accent classification that is
+                robust to class imbalance and cross-corpus domain shift. AccentCL extracts
+                multi-layer representations from a frozen Whisper-Large-v3 encoder, optimized with a
+                class-balanced cross-entropy loss to reduce bias toward the majority accent classes
+                and a corpus-mean alignment loss that minimizes distributional mean shift across
+                training corpora. The label space is then expanded via replay-based continual
+                learning, using the frozen base model for knowledge retention and an old-to-new
+                margin loss to reduce overprediction on newly added classes. On a five-class accent
+                classification task, AccentCL achieves 77.1% balanced accuracy and a 76.9%
+                macro-averaged F1 score. We further evaluate the model's ability to incrementally
+                incorporate two new accent categories: Spanish-accented and Chinese-accented
+                English. When adding Spanish-accented English to the pretrained model, AccentCL
+                attains an F1 of 83.3% on the new class while retaining 77.3% balanced accuracy on
+                the base classes. When subsequently adding Chinese-accented English, it achieves
+                61.8% F1 on the new class while preserving 77.6% balanced accuracy on the
+                previously learned classes. These results show that accent classifiers can be
+                extended to new categories without full retraining.
               </p>
             </div>
           </div>
@@ -61,7 +63,7 @@
                 <b>Model architecture of AccentCL.</b> A frozen Whisper-Large-v3 encoder provides
                 multi-layer speech representations, which are projected, concatenated, and pooled
                 with attentive statistics pooling to produce an accent embedding. Phase 1 trains a
-                base regional accent classifier with source mean alignment. Phase 2 expands the
+                base regional accent classifier with domain mean alignment. Phase 2 expands the
                 classifier to a new accent class using replay-based continual training with
                 retention and an old-to-new margin loss
               </p>
@@ -128,11 +130,11 @@
               </div>
               <p class="figure-caption">
                 <b>Left:</b> Confusion matrix of the final 7-way classifier (5 regions + Spanish-
-                and Chinese-accented English), showing old-class predictions remain concentrated
-                on the diagonal after two rounds of class expansion.
-                <b>Right:</b> t-SNE projection of accent embeddings at the same stage, showing
-                the newly added Chinese-accented English cluster is well separated from the
-                five base regional clusters and from Spanish-accented English.
+                and Chinese-accented English), showing old-class predictions remain concentrated on
+                the diagonal after two rounds of class expansion. <b>Right:</b> t-SNE projection of
+                accent embeddings at the same stage, showing the newly added Chinese-accented
+                English cluster is well separated from the five base regional clusters and from
+                Spanish-accented English.
               </p>
             </div>
           </div>
