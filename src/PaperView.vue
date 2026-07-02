@@ -27,10 +27,10 @@
                 differences in recording conditions across corpora. We present AccentCL, a
                 class-incremental learning framework for English accent classification that is
                 robust to class imbalance and cross-corpus domain shift. AccentCL extracts
-                multi-layer representations from a frozen Whisper-Large-v3 encoder, optimized with a
-                class-balanced cross-entropy loss to reduce bias toward the majority accent classes
-                and a corpus-mean alignment loss that minimizes distributional mean shift across
-                training corpora. The label space is then expanded via replay-based continual
+                multi-layer representations from a frozen Whisper-Large-v3 encoder, optimized with
+                an imbalance-aware cross-entropy loss to reduce bias toward the majority accent
+                classes and a domain mean alignment loss that minimizes distributional mean shift
+                across training corpora. The label space is then expanded via replay-based continual
                 learning, using the frozen base model for knowledge retention and an old-to-new
                 margin loss to reduce overprediction on newly added classes. On a five-class accent
                 classification task, AccentCL achieves 77.1% balanced accuracy and a 76.9%
