@@ -40,8 +40,9 @@
                 attains an F1 of 83.3% on the new class while retaining 77.3% balanced accuracy on
                 the base classes. When subsequently adding Chinese-accented English, it achieves
                 61.8% F1 on the new class while preserving 77.6% balanced accuracy on the
-                previously learned classes. These results show that accent classifiers can be
-                extended to new categories without full retraining.
+                previously learned classes. These results show that AccentCL enables robust regional
+                accent classification while allowing new accent categories to be added without full
+                retraining.
               </p>
             </div>
           </div>
